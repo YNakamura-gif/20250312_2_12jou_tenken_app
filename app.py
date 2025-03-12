@@ -93,26 +93,29 @@ with tab1:
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
-        # 場所の入力（予測変換機能付き）
-        location_search = st.text_input("場所を検索", key="location_search")
-        location_options = filter_options(location_search, location_master_df, "場所", "よみ")
-        location = st.selectbox(
-            "場所を選択",
-            options=[""] + location_options,
-            key="location_input"
-        )
+        col1, col2 = st.columns(2)
+        with col1:
+            # 場所の入力（予測変換機能付き）
+            location_search = st.text_input("場所を検索", key="location_search")
+            location_options = filter_options(location_search, location_master_df, "場所", "よみ")
+            location = st.selectbox(
+                "場所を選択",
+                options=[""] + location_options,
+                key="location_input"
+            )
+            
+            # 劣化名の入力（予測変換機能付き）
+            deterioration_search = st.text_input("劣化名を検索", key="deterioration_search")
+            deterioration_options = filter_options(deterioration_search, deterioration_master_df, "劣化名", "よみ")
+            deterioration_name = st.selectbox(
+                "劣化名を選択",
+                options=[""] + deterioration_options,
+                key="deterioration_name_input"
+            )
         
-        # 劣化名の入力（予測変換機能付き）
-        deterioration_search = st.text_input("劣化名を検索", key="deterioration_search")
-        deterioration_options = filter_options(deterioration_search, deterioration_master_df, "劣化名", "よみ")
-        deterioration_name = st.selectbox(
-            "劣化名を選択",
-            options=[""] + deterioration_options,
-            key="deterioration_name_input"
-        )
-        
-        # 写真番号の入力
-        photo_number = st.text_input("写真番号")
+        with col2:
+            # 写真番号の入力
+            photo_number = st.text_input("写真番号")
         
         # 追加ボタン
         submit_button = st.form_submit_button("追加")
