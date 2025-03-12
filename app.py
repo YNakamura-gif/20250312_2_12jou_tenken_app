@@ -61,51 +61,48 @@ with tab1:
     # 劣化内容セクション
     st.subheader("劣化内容入力")
     
-    # 場所と劣化名の選択肢を表示（フォームの外に配置）
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.write("場所の候補")
-        location_selection = st.selectbox(
-            "場所の候補から選択",
-            options=[""] + location_master,
-            key="location_selection"
-        )
-        if location_selection and st.button("場所を選択", key="select_location"):
-            st.session_state["temp_location"] = location_selection
-    
-    with col2:
-        st.write("劣化名の候補")
-        deterioration_selection = st.selectbox(
-            "劣化名の候補から選択",
-            options=[""] + deterioration_master,
-            key="deterioration_selection"
-        )
-        if deterioration_selection and st.button("劣化名を選択", key="select_deterioration"):
-            st.session_state["temp_deterioration"] = deterioration_selection
-    
-    # 一時的な値の初期化
-    if "temp_location" not in st.session_state:
-        st.session_state["temp_location"] = ""
-    if "temp_deterioration" not in st.session_state:
-        st.session_state["temp_deterioration"] = ""
-    
     # 劣化内容入力フォーム
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
-        # 場所の入力（直接入力も可能）
+        # 場所の入力（直接入力も可能、候補はdatalistで表示）
         location = st.text_input(
             "場所",
             key="location_input",
-            value=st.session_state["temp_location"]
+            autocomplete="on"
         )
         
-        # 劣化名の入力（直接入力も可能）
+        # 場所の候補リストを非表示で表示
+        st.markdown(
+            f"""
+            <datalist id="location-list">
+                {"".join([f'<option value="{loc}">' for loc in location_master])}
+            </datalist>
+            <script>
+                document.querySelector('input[aria-label="場所"]').setAttribute('list', 'location-list');
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # 劣化名の入力（直接入力も可能、候補はdatalistで表示）
         deterioration_name = st.text_input(
             "劣化名",
             key="deterioration_name_input",
-            value=st.session_state["temp_deterioration"]
+            autocomplete="on"
+        )
+        
+        # 劣化名の候補リストを非表示で表示
+        st.markdown(
+            f"""
+            <datalist id="deterioration-list">
+                {"".join([f'<option value="{det}">' for det in deterioration_master])}
+            </datalist>
+            <script>
+                document.querySelector('input[aria-label="劣化名"]').setAttribute('list', 'deterioration-list');
+            </script>
+            """,
+            unsafe_allow_html=True
         )
         
         # 写真番号の入力
@@ -126,10 +123,6 @@ with tab1:
                 
                 st.session_state.deterioration_items.append(deterioration_item)
                 st.session_state.next_deterioration_id += 1
-                
-                # 入力フィールドのリセット
-                st.session_state["temp_location"] = ""
-                st.session_state["temp_deterioration"] = ""
                 
                 st.success("劣化項目を追加しました。")
                 st.rerun()
