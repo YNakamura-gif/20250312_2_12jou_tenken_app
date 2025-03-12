@@ -66,43 +66,19 @@ with tab1:
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
         # 場所の入力（直接入力も可能、候補はdatalistで表示）
-        location = st.text_input(
+        location = st.selectbox(
             "場所",
+            options=[""] + location_master,
             key="location_input",
-            autocomplete="on"
-        )
-        
-        # 場所の候補リストを非表示で表示
-        st.markdown(
-            f"""
-            <datalist id="location-list">
-                {"".join([f'<option value="{loc}">' for loc in location_master])}
-            </datalist>
-            <script>
-                document.querySelector('input[aria-label="場所"]').setAttribute('list', 'location-list');
-            </script>
-            """,
-            unsafe_allow_html=True
+            index=0
         )
         
         # 劣化名の入力（直接入力も可能、候補はdatalistで表示）
-        deterioration_name = st.text_input(
+        deterioration_name = st.selectbox(
             "劣化名",
+            options=[""] + deterioration_master,
             key="deterioration_name_input",
-            autocomplete="on"
-        )
-        
-        # 劣化名の候補リストを非表示で表示
-        st.markdown(
-            f"""
-            <datalist id="deterioration-list">
-                {"".join([f'<option value="{det}">' for det in deterioration_master])}
-            </datalist>
-            <script>
-                document.querySelector('input[aria-label="劣化名"]').setAttribute('list', 'deterioration-list');
-            </script>
-            """,
-            unsafe_allow_html=True
+            index=0
         )
         
         # 写真番号の入力
