@@ -61,6 +61,35 @@ with tab1:
     # 劣化内容セクション
     st.subheader("劣化内容入力")
     
+    # 場所と劣化名の選択肢を表示（フォームの外に配置）
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("場所の候補")
+        location_selection = st.selectbox(
+            "場所の候補から選択",
+            options=[""] + location_master,
+            key="location_selection"
+        )
+        if location_selection and st.button("場所を選択", key="select_location"):
+            st.session_state["temp_location"] = location_selection
+    
+    with col2:
+        st.write("劣化名の候補")
+        deterioration_selection = st.selectbox(
+            "劣化名の候補から選択",
+            options=[""] + deterioration_master,
+            key="deterioration_selection"
+        )
+        if deterioration_selection and st.button("劣化名を選択", key="select_deterioration"):
+            st.session_state["temp_deterioration"] = deterioration_selection
+    
+    # 一時的な値の初期化
+    if "temp_location" not in st.session_state:
+        st.session_state["temp_location"] = ""
+    if "temp_deterioration" not in st.session_state:
+        st.session_state["temp_deterioration"] = ""
+    
     # 劣化内容入力フォーム
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
@@ -69,34 +98,14 @@ with tab1:
         location = st.text_input(
             "場所",
             key="location_input",
-            autocomplete="off"
-        )
-        
-        # 場所の選択肢を表示
-        location_options = st.multiselect(
-            "場所の候補から選択",
-            options=location_master,
-            key="location_options",
-            label_visibility="collapsed",
-            on_change=lambda: setattr(st.session_state, "location_input", 
-                                     st.session_state.location_options[-1] if st.session_state.location_options else st.session_state.location_input)
+            value=st.session_state["temp_location"]
         )
         
         # 劣化名の入力（直接入力も可能）
         deterioration_name = st.text_input(
             "劣化名",
             key="deterioration_name_input",
-            autocomplete="off"
-        )
-        
-        # 劣化名の選択肢を表示
-        deterioration_options = st.multiselect(
-            "劣化名の候補から選択",
-            options=deterioration_master,
-            key="deterioration_options",
-            label_visibility="collapsed",
-            on_change=lambda: setattr(st.session_state, "deterioration_name_input", 
-                                     st.session_state.deterioration_options[-1] if st.session_state.deterioration_options else st.session_state.deterioration_name_input)
+            value=st.session_state["temp_deterioration"]
         )
         
         # 写真番号の入力
@@ -119,8 +128,8 @@ with tab1:
                 st.session_state.next_deterioration_id += 1
                 
                 # 入力フィールドのリセット
-                # st.session_state.location_input = ""
-                # st.session_state.deterioration_name_input = ""
+                st.session_state["temp_location"] = ""
+                st.session_state["temp_deterioration"] = ""
                 
                 st.success("劣化項目を追加しました。")
                 st.rerun()
