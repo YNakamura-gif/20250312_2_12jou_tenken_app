@@ -30,22 +30,31 @@ def load_master_data(file_path, encoding='utf-8'):
 
 # 検索用の関数
 def filter_options(search_text, master_df, name_col, reading_col):
-    if not search_text:
+    if not search_text or search_text.strip() == "":
         return master_df[name_col].tolist()
     
     # 検索テキストを小文字に変換
-    search_text_lower = search_text.lower()
+    search_text = search_text.strip().lower()
     
-    # 名前または読みが検索テキストを含む行をフィルタリング
-    name_match = master_df[name_col].str.contains(search_text_lower, case=False)
+    # 結果を格納するリスト
+    filtered_items = []
     
-    # 読みが検索テキストで始まる行をフィルタリング
-    reading_match = master_df[reading_col].str.lower().str.startswith(search_text_lower)
+    # 各行を個別に処理
+    for _, row in master_df.iterrows():
+        name = str(row[name_col])
+        reading = str(row[reading_col])
+        
+        # 名前に検索テキストが含まれる場合
+        if search_text in name.lower():
+            filtered_items.append(name)
+            continue
+            
+        # 読みが検索テキストで始まる場合
+        if reading.lower().startswith(search_text):
+            filtered_items.append(name)
+            continue
     
-    # 両方の条件を組み合わせる
-    filtered = master_df[name_match | reading_match]
-    
-    return filtered[name_col].tolist()
+    return filtered_items
 
 # マスターデータの読み込み
 location_master_df = load_master_data("master/location_master.csv")
