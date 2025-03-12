@@ -74,16 +74,6 @@ with tab1:
         # 場所の入力（予測変換と自由入力の両方を可能に）
         col1, col2 = st.columns([3, 1])
         with col1:
-            # 場所の選択（予測変換機能付き）
-            location_options = [""] + location_master
-            location_selection = st.selectbox(
-                "場所",
-                options=location_options,
-                key="location_selection",
-                index=0
-            )
-        
-        with col2:
             # 自由入力モードの切り替え
             free_input_location = st.checkbox("自由入力", key="free_input_location")
         
@@ -91,25 +81,22 @@ with tab1:
         if free_input_location:
             location = st.text_input(
                 "場所を入力",
-                key="location_text_input",
-                label_visibility="collapsed"
+                key="location_text_input"
             )
         else:
-            location = location_selection
+            # 場所の選択（予測変換機能付き）
+            location_options = [""] + location_master
+            location = st.selectbox(
+                "場所",
+                options=location_options,
+                key="location_selection",
+                index=0,
+                label_visibility="collapsed"
+            )
         
         # 劣化名の入力（予測変換と自由入力の両方を可能に）
         col1, col2 = st.columns([3, 1])
         with col1:
-            # 劣化名の選択（予測変換機能付き）
-            deterioration_options = [""] + deterioration_master
-            deterioration_selection = st.selectbox(
-                "劣化名",
-                options=deterioration_options,
-                key="deterioration_selection",
-                index=0
-            )
-        
-        with col2:
             # 自由入力モードの切り替え
             free_input_deterioration = st.checkbox("自由入力", key="free_input_deterioration")
         
@@ -117,11 +104,18 @@ with tab1:
         if free_input_deterioration:
             deterioration_name = st.text_input(
                 "劣化名を入力",
-                key="deterioration_text_input",
-                label_visibility="collapsed"
+                key="deterioration_text_input"
             )
         else:
-            deterioration_name = deterioration_selection
+            # 劣化名の選択（予測変換機能付き）
+            deterioration_options = [""] + deterioration_master
+            deterioration_name = st.selectbox(
+                "劣化名",
+                options=deterioration_options,
+                key="deterioration_selection",
+                index=0,
+                label_visibility="collapsed"
+            )
         
         # 写真番号の入力
         photo_number = st.text_input("写真番号")
