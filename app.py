@@ -65,19 +65,27 @@ with tab1:
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
-        # 場所の入力（予測変換機能付き）
-        location = st.selectbox(
+        # 場所の入力（直接入力も可能）
+        location = st.text_input(
             "場所",
-            options=[""] + location_master,
             key="location_input"
         )
         
-        # 劣化名の入力（予測変換機能付き）
-        deterioration_name = st.selectbox(
+        # 場所の選択肢を表示
+        st.caption("場所の選択肢:")
+        location_options_text = ", ".join(location_master)
+        st.caption(location_options_text)
+        
+        # 劣化名の入力（直接入力も可能）
+        deterioration_name = st.text_input(
             "劣化名",
-            options=[""] + deterioration_master,
             key="deterioration_name_input"
         )
+        
+        # 劣化名の選択肢を表示
+        st.caption("劣化名の選択肢:")
+        deterioration_options_text = ", ".join(deterioration_master)
+        st.caption(deterioration_options_text)
         
         # 写真番号の入力
         photo_number = st.text_input("写真番号")
