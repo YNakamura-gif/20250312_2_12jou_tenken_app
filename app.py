@@ -4,7 +4,6 @@ import os
 import json
 import datetime
 import numpy as np
-import re
 
 # ページ設定
 st.set_page_config(
@@ -16,121 +15,33 @@ st.set_page_config(
 # タイトル
 st.title("12条点検 Web アプリ")
 
-# 日本語の文字変換ヘルパー関数
-def contains_japanese_prefix(item, query):
-    """
-    ひらがな一文字目で漢字やカタカナの選択肢も検索できるようにする関数
-    """
-    if not query:
-        return True
-    
-    # クエリを小文字に変換
-    query = query.lower()
-    
-    # アイテムの先頭文字がクエリの先頭文字と一致するか確認
-    if item.lower().startswith(query):
-        return True
-    
-    # 日本語の場合、ひらがな/カタカナ/漢字の先頭文字をチェック
-    hiragana_map = {
-        'あ': ['ア', '亜', '愛', '安', '明', '赤'],
-        'い': ['イ', '以', '伊', '位', '井', '石'],
-        'う': ['ウ', '宇', '羽', '雨', '上', '浮'],
-        'え': ['エ', '英', '栄', '永', '映', '江'],
-        'お': ['オ', '大', '小', '音', '男', '女'],
-        'か': ['カ', '火', '花', '家', '科', '課'],
-        'き': ['キ', '木', '気', '機', '記', '規'],
-        'く': ['ク', '空', '区', '工', '口', '苦'],
-        'け': ['ケ', '毛', '計', '経', '形', '京'],
-        'こ': ['コ', '子', '小', '古', '湖', '好'],
-        'さ': ['サ', '差', '左', '佐', '作', '沙'],
-        'し': ['シ', '市', '思', '指', '支', '死'],
-        'す': ['ス', '数', '水', '吸', '寸', '酢'],
-        'せ': ['セ', '世', '正', '生', '成', '西'],
-        'そ': ['ソ', '空', '素', '組', '祖', '草'],
-        'た': ['タ', '田', '多', '太', '対', '体'],
-        'ち': ['チ', '地', '知', '値', '置', '遅'],
-        'つ': ['ツ', '通', '使', '次', '付', '爪'],
-        'て': ['テ', '手', '天', '店', '点', '鉄'],
-        'と': ['ト', '戸', '都', '東', '当', '等'],
-        'な': ['ナ', '名', '無', '南', '菜', '中'],
-        'に': ['ニ', '二', '日', '入', '人', '西'],
-        'ぬ': ['ヌ', '沼', '温', '布', '主'],
-        'ね': ['ネ', '根', '値', '猫', '熱', '寝'],
-        'の': ['ノ', '野', '農', '能', '脳', '納'],
-        'は': ['ハ', '花', '葉', '春', '早', '半'],
-        'ひ': ['ヒ', '火', '日', '飛', '光', '左'],
-        'ふ': ['フ', '不', '風', '夫', '婦', '冬'],
-        'へ': ['ヘ', '部', '辺', '変', '返', '減'],
-        'ほ': ['ホ', '保', '歩', '穂', '星', '本'],
-        'ま': ['マ', '間', '前', '待', '町', '万'],
-        'み': ['ミ', '見', '水', '道', '緑', '南'],
-        'む': ['ム', '無', '村', '向', '昔', '虫'],
-        'め': ['メ', '目', '芽', '女', '雌', '飯'],
-        'も': ['モ', '物', '者', '元', '木', '目'],
-        'や': ['ヤ', '山', '野', '屋', '役', '約'],
-        'ゆ': ['ユ', '由', '油', '輸', '有', '優'],
-        'よ': ['ヨ', '夜', '世', '良', '予', '余'],
-        'ら': ['ラ', '楽', '落', '来', '利', '理'],
-        'り': ['リ', '理', '里', '陸', '立', '律'],
-        'る': ['ル', '留', '類', '流', '涙', '累'],
-        'れ': ['レ', '礼', '例', '冷', '列', '連'],
-        'ろ': ['ロ', '路', '労', '老', '論', '六'],
-        'わ': ['ワ', '和', '話', '輪', '環', '湾'],
-        'を': ['ヲ', '尾', '緒', '男', '雄', '小'],
-        'ん': ['ン', '運', '雲', '温', '恩', '音']
-    }
-    
-    # クエリの先頭文字がひらがなマップに存在するか確認
-    if query[0] in hiragana_map:
-        # アイテムの先頭文字がマップされた文字のいずれかで始まるか確認
-        for prefix in hiragana_map[query[0]]:
-            if item.startswith(prefix):
-                return True
-    
-    return False
-
-# カスタムセレクトボックス
-def custom_selectbox(label, options, key=None, default=""):
-    """
-    ひらがな一文字目で漢字やカタカナの選択肢も検索できるカスタムセレクトボックス
-    """
-    # テキスト入力フィールド
-    search_term = st.text_input(f"{label}を検索", value=default, key=f"search_{key}")
-    
-    # 検索条件に基づいてオプションをフィルタリング
-    filtered_options = [""]
-    if search_term:
-        filtered_options.extend([opt for opt in options if contains_japanese_prefix(opt, search_term)])
-    else:
-        filtered_options.extend(options)
-    
-    # セレクトボックスを表示
-    selected = st.selectbox(
-        label,
-        options=filtered_options,
-        index=0,
-        key=key
-    )
-    
-    return selected
-
 # マスターデータの読み込み
 def load_master_data(file_path, encoding='utf-8'):
     try:
         if os.path.exists(file_path):
             df = pd.read_csv(file_path, encoding=encoding)
-            return df.iloc[:, 0].tolist()
+            return df
         else:
             st.warning(f"マスターデータファイル {file_path} が見つかりません。")
-            return []
+            return pd.DataFrame()
     except Exception as e:
         st.error(f"マスターデータの読み込みエラー: {e}")
-        return []
+        return pd.DataFrame()
+
+# 検索用の関数
+def filter_options(search_text, master_df, name_col, reading_col):
+    if not search_text:
+        return master_df[name_col].tolist()
+    
+    filtered = master_df[
+        (master_df[name_col].str.contains(search_text, case=False)) | 
+        (master_df[reading_col].str.contains(search_text, case=False))
+    ]
+    return filtered[name_col].tolist()
 
 # マスターデータの読み込み
-location_master = load_master_data("master/location_master.csv")
-deterioration_master = load_master_data("master/deterioration_master.csv")
+location_master_df = load_master_data("master/location_master.csv")
+deterioration_master_df = load_master_data("master/deterioration_master.csv")
 
 # セッション状態の初期化
 if 'deterioration_items' not in st.session_state:
@@ -165,17 +76,21 @@ with tab1:
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
-        # 場所の入力（改良版予測変換機能付き）
-        location = custom_selectbox(
-            "場所",
-            options=location_master,
+        # 場所の入力（予測変換機能付き）
+        location_search = st.text_input("場所を検索", key="location_search")
+        location_options = filter_options(location_search, location_master_df, "場所", "よみ")
+        location = st.selectbox(
+            "場所を選択",
+            options=[""] + location_options,
             key="location_input"
         )
         
-        # 劣化名の入力（改良版予測変換機能付き）
-        deterioration_name = custom_selectbox(
-            "劣化名",
-            options=deterioration_master,
+        # 劣化名の入力（予測変換機能付き）
+        deterioration_search = st.text_input("劣化名を検索", key="deterioration_search")
+        deterioration_options = filter_options(deterioration_search, deterioration_master_df, "劣化名", "よみ")
+        deterioration_name = st.selectbox(
+            "劣化名を選択",
+            options=[""] + deterioration_options,
             key="deterioration_name_input"
         )
         
