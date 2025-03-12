@@ -66,19 +66,37 @@ with tab1:
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
         # 場所の入力（直接入力も可能）
-        location = st.selectbox(
+        location = st.text_input(
             "場所",
-            options=[""] + location_master,
             key="location_input",
-            index=0
+            autocomplete="off"
+        )
+        
+        # 場所の選択肢を表示
+        location_options = st.multiselect(
+            "場所の候補から選択",
+            options=location_master,
+            key="location_options",
+            label_visibility="collapsed",
+            on_change=lambda: setattr(st.session_state, "location_input", 
+                                     st.session_state.location_options[-1] if st.session_state.location_options else st.session_state.location_input)
         )
         
         # 劣化名の入力（直接入力も可能）
-        deterioration_name = st.selectbox(
+        deterioration_name = st.text_input(
             "劣化名",
-            options=[""] + deterioration_master,
             key="deterioration_name_input",
-            index=0
+            autocomplete="off"
+        )
+        
+        # 劣化名の選択肢を表示
+        deterioration_options = st.multiselect(
+            "劣化名の候補から選択",
+            options=deterioration_master,
+            key="deterioration_options",
+            label_visibility="collapsed",
+            on_change=lambda: setattr(st.session_state, "deterioration_name_input", 
+                                     st.session_state.deterioration_options[-1] if st.session_state.deterioration_options else st.session_state.deterioration_name_input)
         )
         
         # 写真番号の入力
