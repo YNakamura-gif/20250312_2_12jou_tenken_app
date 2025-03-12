@@ -89,29 +89,29 @@ with tab1:
     # 劣化内容セクション
     st.subheader("劣化内容入力")
     
+    # 一時的な値の初期化
+    if "custom_location" not in st.session_state:
+        st.session_state["custom_location"] = ""
+    if "custom_deterioration" not in st.session_state:
+        st.session_state["custom_deterioration"] = ""
+    
     # 劣化内容入力フォーム
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
-        col1, col2 = st.columns(2)
-        with col1:
-            # 場所の入力（予測変換機能付き）
-            location_search = st.text_input("場所を検索", key="location_search")
-            location_options = filter_options(location_search, location_master_df, "場所", "よみ")
-            location = st.selectbox(
-                "場所を選択",
-                options=[""] + location_options,
-                key="location_input"
-            )
-            
-            # 劣化名の入力（予測変換機能付き）
-            deterioration_search = st.text_input("劣化名を検索", key="deterioration_search")
-            deterioration_options = filter_options(deterioration_search, deterioration_master_df, "劣化名", "よみ")
-            deterioration_name = st.selectbox(
-                "劣化名を選択",
-                options=[""] + deterioration_options,
-                key="deterioration_name_input"
-            )
+        # 場所の入力（予測変換機能付き）
+        location = st.selectbox(
+            "場所",
+            options=[""] + location_master,
+            key="location_input"
+        )
+        
+        # 劣化名の入力（予測変換機能付き）
+        deterioration_name = st.selectbox(
+            "劣化名",
+            options=[""] + deterioration_master,
+            key="deterioration_name_input"
+        )
         
         with col2:
             # 写真番号の入力
@@ -130,12 +130,14 @@ with tab1:
                     "photo_number": photo_number
                 }
                 
+                # カスタム入力を保存
+                if location_selection == "その他（直接入力）":
+                    st.session_state["custom_location"] = location
+                if deterioration_selection == "その他（直接入力）":
+                    st.session_state["custom_deterioration"] = deterioration_name
+                
                 st.session_state.deterioration_items.append(deterioration_item)
                 st.session_state.next_deterioration_id += 1
-                
-                # 入力フィールドのリセット
-                # st.session_state.location_input = ""
-                # st.session_state.deterioration_name_input = ""
                 
                 st.success("劣化項目を追加しました。")
                 st.rerun()
