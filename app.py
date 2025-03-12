@@ -61,49 +61,53 @@ with tab1:
     # 劣化内容セクション
     st.subheader("劣化内容入力")
     
+    # 一時的な値の初期化
+    if "custom_location" not in st.session_state:
+        st.session_state["custom_location"] = ""
+    if "custom_deterioration" not in st.session_state:
+        st.session_state["custom_deterioration"] = ""
+    
     # 劣化内容入力フォーム
     with st.form(key="deterioration_form"):
         st.write(f"劣化番号: {st.session_state.next_deterioration_id}")
         
-        # 場所の入力（直接入力も可能）
-        location = st.text_input(
-            "場所",
-            key="location_input"
-        )
-        
-        # 場所の候補リスト
+        # 場所の選択（予測変換機能付き）
+        location_options = [""] + location_master + ["その他（直接入力）"]
         location_selection = st.selectbox(
-            "場所の候補から選択",
-            options=[""] + location_master,
+            "場所",
+            options=location_options,
             key="location_selection",
-            label_visibility="collapsed"
+            index=0
         )
         
-        # 場所の候補が選択された場合、入力欄に反映
-        if location_selection and location_selection != st.session_state.get("prev_location_selection", ""):
-            st.session_state["prev_location_selection"] = location_selection
-            st.session_state["location_input"] = location_selection
-            st.rerun()
+        # 「その他」が選択された場合、直接入力欄を表示
+        if location_selection == "その他（直接入力）":
+            location = st.text_input(
+                "場所を入力してください",
+                key="custom_location_input",
+                value=st.session_state["custom_location"]
+            )
+        else:
+            location = location_selection
         
-        # 劣化名の入力（直接入力も可能）
-        deterioration_name = st.text_input(
-            "劣化名",
-            key="deterioration_name_input"
-        )
-        
-        # 劣化名の候補リスト
+        # 劣化名の選択（予測変換機能付き）
+        deterioration_options = [""] + deterioration_master + ["その他（直接入力）"]
         deterioration_selection = st.selectbox(
-            "劣化名の候補から選択",
-            options=[""] + deterioration_master,
+            "劣化名",
+            options=deterioration_options,
             key="deterioration_selection",
-            label_visibility="collapsed"
+            index=0
         )
         
-        # 劣化名の候補が選択された場合、入力欄に反映
-        if deterioration_selection and deterioration_selection != st.session_state.get("prev_deterioration_selection", ""):
-            st.session_state["prev_deterioration_selection"] = deterioration_selection
-            st.session_state["deterioration_name_input"] = deterioration_selection
-            st.rerun()
+        # 「その他」が選択された場合、直接入力欄を表示
+        if deterioration_selection == "その他（直接入力）":
+            deterioration_name = st.text_input(
+                "劣化名を入力してください",
+                key="custom_deterioration_input",
+                value=st.session_state["custom_deterioration"]
+            )
+        else:
+            deterioration_name = deterioration_selection
         
         # 写真番号の入力
         photo_number = st.text_input("写真番号")
@@ -120,6 +124,12 @@ with tab1:
                     "deterioration_name": deterioration_name,
                     "photo_number": photo_number
                 }
+                
+                # カスタム入力を保存
+                if location_selection == "その他（直接入力）":
+                    st.session_state["custom_location"] = location
+                if deterioration_selection == "その他（直接入力）":
+                    st.session_state["custom_deterioration"] = deterioration_name
                 
                 st.session_state.deterioration_items.append(deterioration_item)
                 st.session_state.next_deterioration_id += 1
