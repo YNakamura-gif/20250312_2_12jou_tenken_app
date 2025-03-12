@@ -60,6 +60,10 @@ def filter_options(search_text, master_df, name_col, reading_col):
 location_master_df = load_master_data("master/location_master.csv")
 deterioration_master_df = load_master_data("master/deterioration_master.csv")
 
+# マスターデータからリストを作成
+location_master = location_master_df["場所"].tolist() if not location_master_df.empty else []
+deterioration_master = deterioration_master_df["劣化名"].tolist() if not deterioration_master_df.empty else []
+
 # セッション状態の初期化
 if 'deterioration_items' not in st.session_state:
     st.session_state.deterioration_items = []
@@ -113,9 +117,8 @@ with tab1:
             key="deterioration_name_input"
         )
         
-        with col2:
-            # 写真番号の入力
-            photo_number = st.text_input("写真番号")
+        # 写真番号の入力
+        photo_number = st.text_input("写真番号")
         
         # 追加ボタン
         submit_button = st.form_submit_button("追加")
@@ -131,9 +134,9 @@ with tab1:
                 }
                 
                 # カスタム入力を保存
-                if location_selection == "その他（直接入力）":
+                if location == "その他（直接入力）":
                     st.session_state["custom_location"] = location
-                if deterioration_selection == "その他（直接入力）":
+                if deterioration_name == "その他（直接入力）":
                     st.session_state["custom_deterioration"] = deterioration_name
                 
                 st.session_state.deterioration_items.append(deterioration_item)
