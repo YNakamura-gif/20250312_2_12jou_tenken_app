@@ -33,10 +33,18 @@ def filter_options(search_text, master_df, name_col, reading_col):
     if not search_text:
         return master_df[name_col].tolist()
     
-    filtered = master_df[
-        (master_df[name_col].str.contains(search_text, case=False)) | 
-        (master_df[reading_col].str.contains(search_text, case=False))
-    ]
+    # 検索テキストを小文字に変換
+    search_text_lower = search_text.lower()
+    
+    # 名前または読みが検索テキストを含む行をフィルタリング
+    name_match = master_df[name_col].str.contains(search_text_lower, case=False)
+    
+    # 読みが検索テキストで始まる行をフィルタリング
+    reading_match = master_df[reading_col].str.lower().str.startswith(search_text_lower)
+    
+    # 両方の条件を組み合わせる
+    filtered = master_df[name_match | reading_match]
+    
     return filtered[name_col].tolist()
 
 # マスターデータの読み込み
